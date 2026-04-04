@@ -315,7 +315,7 @@ sharkcode/
 | Metric | Value |
 |--------|-------|
 | Total commits | 575+ |
-| Development phases completed | 47 |
+| Development phases completed | 47 (53 planned) |
 | Lines of code (server) | ~6,200 |
 | Lines of code (client) | ~15,500 |
 | Lines of code (orchestrator) | ~4,800 |
@@ -387,13 +387,17 @@ bun run dev              # http://localhost:5173
 bun run tools/orchestrator/run-pipeline.ts {clientId} {phase}
 ```
 
-## What's next (v3.1 roadmap)
+## What's next
 
-- **Phase 48:** n8n webhook integration
-- **Phase 49:** Calendar event creation + Google Meet links
-- **Phase 50:** Maatilayla project integration (Astro reference site, monitoring)
-- **Phase 51:** Lindorug integration (Shopify e-commerce, theme management)
+### v3.2 Integrations & Automation
+- **Phase 48:** n8n webhook integration (bidirectional: OS events trigger n8n, n8n pushes data back)
+- **Phase 49:** Calendar event creation + Google Meet links from dashboard
+- **Phase 50:** Maatilayla integration (Astro reference site: git status, deploy, Lighthouse, pattern extraction)
+- **Phase 51:** Lindorug integration (Shopify CLI: theme push/pull, orders, revenue tracking)
 - **Phase 52:** Wedding Templates integration (personal project)
+
+### v3.3 Technical Insurance
+- **Phase 53:** Test suite & server modularization — split the 2,700-line monolith into route modules, add tests for critical paths, document internal APIs. Goal: eliminate vendor lock-in. Any tool or human should be able to understand and modify the codebase without needing Claude Code's context.
 
 ## Example: full pipeline run
 
@@ -699,7 +703,7 @@ The cost tracking in the dashboard exists for client billing transparency, not b
 - **Single user.** This is built for one person. No auth, no multi-tenancy.
 - **Claude Max dependency.** Agents run on Claude Code CLI with a Max subscription. No fallback to other LLMs.
 - **Windows-first.** Tested primarily on Windows 11. Unix paths work but are less tested.
-- **No tests.** The codebase has Zod validation and quality gates but no unit test suite. Pipeline validation is the test.
+- **No tests (yet).** The codebase has Zod validation and quality gates but no unit test suite. This is tracked as conscious technical debt — Phase 53 (v3.3) will add tests and modularize the server to eliminate vendor lock-in.
 - **SQLite.** Great for single-user, won't scale to concurrent team access. That's fine — there's no team.
 
 ## License
