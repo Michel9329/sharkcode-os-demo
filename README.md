@@ -708,4 +708,4 @@ Private repository. All rights reserved.
 
 ---
 
-*Built with Claude Code by one person who got tired of switching between 15 tabs to manage client projects.*
+*Architected and built by [Michel Dimitri](https://github.com/Michel9329), using Claude Code as a development accelerator. System design, architecture decisions, business logic, and quality standards are human-driven. The AI writes code faster — it doesn't replace knowing what to build and why.*
