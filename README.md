@@ -314,7 +314,7 @@ sharkcode/
 
 | Metric | Value |
 |--------|-------|
-| Total commits | 575+ |
+| Total commits | 590+ |
 | Development phases completed | 47 (53 planned) |
 | Lines of code (server) | ~6,200 |
 | Lines of code (client) | ~15,500 |
@@ -324,7 +324,7 @@ sharkcode/
 | Agent definitions | 16 |
 | Skill definitions | 47 |
 | Research books | 31 |
-| Dashboard views | 15 |
+| Dashboard views | 16 |
 | Vue composables | 17 |
 | Vue components | 60+ |
 | API routes | 40+ |
