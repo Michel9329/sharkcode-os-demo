@@ -10,9 +10,10 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 
 **This is not vaporware.** It manages active client projects with real revenue:
 - 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce) + 11 qualified leads (28,100 EUR pipeline)
-- 63+ completed development phases across 676+ commits
+- 65+ completed development phases across 687+ commits
 - Full 9-phase pipeline: lead → proposal → research → strategy → design → legal → build → review → audit
 - CRM-driven sales lifecycle: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi"
+- Built-in email client: IMAP multi-folder sync, attachments, AI compose with Sharkcode team rules
 - Source audit blocks fabricated output (FAKE verdict triggers automatic retry)
 - End-to-end tested on production client work
 - Deep audited with 27 findings identified and all critical fixes applied
@@ -163,7 +164,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **Discussion** | Thread viewer — agent-to-agent conversations per client/phase |
 | **CRM** | 7-state lead lifecycle, kanban drag-drop, per-lead proposals, unified timeline, "cosa fare oggi", 11 qualified leads |
 | **Finance** | Cost tracking, invoices, expenses, revenue per client |
-| **Email** | Inbox sync (IMAP), search, compose, reply |
+| **Email** | Full IMAP client: Inbox/Sent/Drafts/Trash, attachments, AI compose with team rules, professional signature |
 | **Knowledge** | Full-text search across 31 research books |
 | **Brand** | Identity assets, color palette, typography, brand rules |
 | **Structure** | Org chart, team profiles, tool allowlists, model assignments |
@@ -332,8 +333,8 @@ sharkcode/
 
 | Metric | Value |
 |--------|-------|
-| Total commits | 676+ |
-| Development phases completed | 63 |
+| Total commits | 687+ |
+| Development phases completed | 65 |
 | Lines of code (server) | ~5,400 (modularized into 15 route modules) |
 | Lines of code (client) | ~15,800 |
 | Lines of code (orchestrator) | ~5,600 |
@@ -414,7 +415,7 @@ bun run tools/orchestrator/run-pipeline.ts {clientId} {phase}
 - **Phase 52:** Wedding Templates integration (personal project)
 
 ### Recently completed
-- **v3.6** — CRM-driven sales pipeline: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi", pipeline labeling, 11 qualified leads (28,100 EUR)
+- **v3.6** — CRM-driven sales pipeline + full email client: 7-state machine, per-lead proposals, IMAP multi-folder, attachments, AI compose with team rules, 11 qualified leads (28,100 EUR)
 - **v3.5** — Full pipeline E2E: 9-phase lead-to-audit, source audit FAKE blocking, Tavily MCP, pricing dinamico, template email HTML
 - **v3.4** — Deep project audit (27 findings), critical fixes (config integrity, email auth, cross-boundary imports)
 - **v3.3** — Pre-pipeline client interview system, server modularization (2883→168 LOC), 24-test suite
