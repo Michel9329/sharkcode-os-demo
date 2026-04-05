@@ -10,8 +10,9 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 
 **This is not vaporware.** It manages active client projects with real revenue:
 - 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce)
-- 47 completed development phases across 575+ commits
+- 55 completed development phases across 635+ commits
 - End-to-end tested on production client work
+- Deep audited with 27 findings identified and 5 critical fixes applied
 
 ## Screenshots (real dashboard, not mockups)
 
@@ -55,7 +56,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 │  16 Agent  │ │ MCP Server │  │  Dashboard Server │
 │  Prompts   │ │ (10 tools) │  │  (Bun + SQLite)   │
 │            │ │            │  │                    │
-│ .claude/   │ │ sharkcode  │  │  40+ API routes    │
+│ .claude/   │ │ sharkcode  │  │  101 API routes     │
 │ agents/    │ │ -core      │  │  WebSocket live     │
 │            │ │            │  │  Google Calendar    │
 │ Each has:  │ │ Per-team   │  │  Email IMAP/SMTP   │
@@ -274,14 +275,21 @@ sharkcode/
 │   │   └── apps/
 │   │       ├── server/         # Bun server (40+ routes, WebSocket, integrations)
 │   │       │   └── src/
-│   │       │       ├── index.ts           # Main server (~2700 LOC)
+│   │       │       ├── index.ts            # Slim dispatcher (~168 LOC)
+│   │       │       ├── routes/            # 11 route modules
+│   │       │       │   ├── events.ts      # Pipeline events
+│   │       │       │   ├── clients.ts     # CRM + costs
+│   │       │       │   ├── calendar.ts    # Google Calendar
+│   │       │       │   ├── email.ts       # IMAP/SMTP
+│   │       │       │   ├── webhooks.ts    # n8n integration
+│   │       │       │   └── ...            # 6 more modules
+│   │       │       ├── ws-state.ts        # Shared WebSocket state
+│   │       │       ├── middleware.ts       # CORS + rate limiting
 │   │       │       ├── db.ts              # SQLite schema + WAL
 │   │       │       ├── google-calendar.ts  # OAuth2 + sync
 │   │       │       ├── email-client.ts     # IMAP + SMTP
 │   │       │       ├── cloudflare-api.ts   # Deploy status + triggers
 │   │       │       ├── oauth-crypto.ts     # AES-256-GCM
-│   │       │       ├── calendar-alerts.ts  # Web Push scheduling
-│   │       │       ├── event-retention.ts  # Cleanup + rotation
 │   │       │       └── push.ts            # Web Push notifications
 │   │       └── client/         # Vue 3 dashboard
 │   │           └── src/
@@ -291,11 +299,12 @@ sharkcode/
 │   │               └── styles/      # Dark glassmorphism theme
 │   ├── orchestrator/           # Pipeline engine
 │   │   ├── run-pipeline.ts     # Main runner
-│   │   ├── config.json         # Timeouts, pricing, allowlists, book mappings
+│   │   ├── interview.ts        # Pre-pipeline client interview
+│   │   ├── config.json         # Timeouts, pricing, allowlists, book mappings, interview questions
 │   │   ├── discussion.ts       # Thread management
-│   │   ├── validate.ts         # Quality gates
+│   │   ├── validate.ts         # Quality gates + clarification detection
 │   │   ├── handoff.ts          # Phase-to-phase document generation
-│   │   ├── schemas.ts          # Zod validation
+│   │   ├── schemas.ts          # Zod validation (single config source)
 │   │   └── event-log.ts        # Immutable JSONL log
 │   └── mcp-servers/
 │       └── sharkcode-core/     # Custom MCP server (10 tools)
@@ -314,20 +323,21 @@ sharkcode/
 
 | Metric | Value |
 |--------|-------|
-| Total commits | 590+ |
-| Development phases completed | 47 (53 planned) |
-| Lines of code (server) | ~6,200 |
+| Total commits | 635+ |
+| Development phases completed | 55 |
+| Lines of code (server) | ~4,300 (modularized into 11 route modules) |
 | Lines of code (client) | ~15,500 |
 | Lines of code (orchestrator) | ~4,800 |
 | Lines of code (MCP) | ~560 |
-| **Total LOC** | **~27,000** |
+| **Total LOC** | **~25,000** |
 | Agent definitions | 16 |
 | Skill definitions | 47 |
 | Research books | 31 |
 | Dashboard views | 16 |
 | Vue composables | 17 |
 | Vue components | 60+ |
-| API routes | 40+ |
+| API routes | 101 (documented in API.md) |
+| Test suite | 24 tests (bun:test) for critical paths |
 | MCP tools | 10 |
 | Active client projects | 4 |
 
@@ -389,15 +399,15 @@ bun run tools/orchestrator/run-pipeline.ts {clientId} {phase}
 
 ## What's next
 
-### v3.2 Integrations & Automation
-- **Phase 48:** n8n webhook integration (bidirectional: OS events trigger n8n, n8n pushes data back)
-- **Phase 49:** Calendar event creation + Google Meet links from dashboard
+### Remaining integrations (v3.2, not urgent)
 - **Phase 50:** Maatilayla integration (Astro reference site: git status, deploy, Lighthouse, pattern extraction)
 - **Phase 51:** Lindorug integration (Shopify CLI: theme push/pull, orders, revenue tracking)
 - **Phase 52:** Wedding Templates integration (personal project)
 
-### v3.3 Technical Insurance
-- **Phase 53:** Test suite & server modularization — split the 2,700-line monolith into route modules, add tests for critical paths, document internal APIs. Goal: eliminate vendor lock-in. Any tool or human should be able to understand and modify the codebase without needing Claude Code's context.
+### Recently completed
+- **v3.2** — n8n webhook integration (bidirectional HMAC-SHA256), calendar event creation + Google Meet links
+- **v3.3** — Pre-pipeline client interview system, server modularization (2883→168 LOC), 24-test suite, API.md with 101 endpoints
+- **v3.4** — Deep project audit (27 findings), critical fixes (config integrity, email auth, cross-boundary imports)
 
 ## Example: full pipeline run
 
@@ -703,7 +713,7 @@ The cost tracking in the dashboard exists for client billing transparency, not b
 - **Single user.** This is built for one person. No auth, no multi-tenancy.
 - **Claude Max dependency.** Agents run on Claude Code CLI with a Max subscription. No fallback to other LLMs.
 - **Windows-first.** Tested primarily on Windows 11. Unix paths work but are less tested.
-- **No tests (yet).** The codebase has Zod validation and quality gates but no unit test suite. This is tracked as conscious technical debt — Phase 53 (v3.3) will add tests and modularize the server to eliminate vendor lock-in.
+- **Partial test coverage.** 24 tests cover 4 critical paths (pipeline events, webhook HMAC, OAuth, system health). 7 of 11 route modules still lack dedicated tests.
 - **SQLite.** Great for single-user, won't scale to concurrent team access. That's fine — there's no team.
 
 ## License
