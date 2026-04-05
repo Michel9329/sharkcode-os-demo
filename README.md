@@ -9,12 +9,13 @@ Sharkcode OS is the command center for [Sharkcode OU](https://sharkcodestudio.co
 The system orchestrates specialized AI agents through a pipeline with explicit checkpoints and human approval gates. Michel says a client name, the system runs research, competitor analysis, SEO, design, legal, development — stopping at each phase for review. Agents communicate with each other through discussion threads. Everything is logged, costed, and visible in a real-time dashboard.
 
 **This is not vaporware.** It manages active client projects with real revenue:
-- 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce)
-- 56+ completed development phases across 640+ commits
+- 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce) + 11 qualified leads (28,100 EUR pipeline)
+- 63+ completed development phases across 676+ commits
 - Full 9-phase pipeline: lead → proposal → research → strategy → design → legal → build → review → audit
+- CRM-driven sales lifecycle: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi"
 - Source audit blocks fabricated output (FAKE verdict triggers automatic retry)
 - End-to-end tested on production client work
-- Deep audited with 27 findings identified and 5 critical fixes applied
+- Deep audited with 27 findings identified and all critical fixes applied
 
 ## Screenshots (real dashboard, not mockups)
 
@@ -26,9 +27,13 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 |:--------:|:--------------:|
 | ![Projects](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/03-progetti.png) | ![Knowledge](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/05-knowledge.png) |
 
-| Brand Identity | System Health |
-|:--------------:|:-------------:|
-| ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) | ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png) |
+| CRM (11 leads, 28.100 EUR) | Brand Identity |
+|:--------------------------:|:--------------:|
+| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) |
+
+| System Health | Automations |
+|:-------------:|:-----------:|
+| ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png) | ![Automazioni](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/08-automazioni.png) |
 
 ## Architecture
 
@@ -58,7 +63,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 │  16 Agent  │ │ MCP Server │  │  Dashboard Server │
 │  Prompts   │ │ (10 tools) │  │  (Bun + SQLite)   │
 │            │ │            │  │                    │
-│ .claude/   │ │ sharkcode  │  │  101 API routes     │
+│ .claude/   │ │ sharkcode  │  │  120+ API routes    │
 │ agents/    │ │ -core      │  │  WebSocket live     │
 │            │ │            │  │  Google Calendar    │
 │ Each has:  │ │ Per-team   │  │  Email IMAP/SMTP   │
@@ -156,7 +161,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **Project Detail** | Single project deep dive: timeline, discussions, artifacts |
 | **Activity** | Real-time event stream from all agents (WebSocket) |
 | **Discussion** | Thread viewer — agent-to-agent conversations per client/phase |
-| **CRM** | Client pipeline: lead → prospect → client, contact history, revenue |
+| **CRM** | 7-state lead lifecycle, kanban drag-drop, per-lead proposals, unified timeline, "cosa fare oggi", 11 qualified leads |
 | **Finance** | Cost tracking, invoices, expenses, revenue per client |
 | **Email** | Inbox sync (IMAP), search, compose, reply |
 | **Knowledge** | Full-text search across 31 research books |
@@ -165,7 +170,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **System Health** | Server uptime, DB stats, WebSocket connections, staleness detection |
 | **Deploy** | Cloudflare Pages: deployment history, status, trigger redeploy |
 | **Changelog** | Release notes per phase |
-| **Automations** | Active pipelines with live status, checkpoint approve/reject with output preview, phase history |
+| **Automations** | Active pipelines with live status, checkpoint approve/reject with output preview, pipeline type/lead labels, archive history |
 
 The design is glassmorphism dark theme with semi-transparent cards, blur effects, and subtle glow animations. Premium look, not Material UI defaults.
 
@@ -287,7 +292,8 @@ sharkcode/
 │   │       │       │   └── ...            # 6 more modules
 │   │       │       ├── ws-state.ts        # Shared WebSocket state
 │   │       │       ├── middleware.ts       # CORS + rate limiting
-│   │       │       ├── db.ts              # SQLite schema + WAL
+│   │       │       ├── db.ts              # SQLite schema + WAL + CRM tables
+│   │       │       ├── lead-state-machine.ts  # 7-state CRM lifecycle
 │   │       │       ├── google-calendar.ts  # OAuth2 + sync
 │   │       │       ├── email-client.ts     # IMAP + SMTP
 │   │       │       ├── cloudflare-api.ts   # Deploy status + triggers
@@ -300,7 +306,8 @@ sharkcode/
 │   │               ├── composables/ # 17 composables
 │   │               └── styles/      # Dark glassmorphism theme
 │   ├── orchestrator/           # Pipeline engine
-│   │   ├── run-pipeline.ts     # Main runner
+│   │   ├── run-pipeline.ts     # Main runner (--lead flag for per-lead proposals)
+│   │   ├── lead-utils.ts       # Lead extraction, brief generation, pre-launch validation
 │   │   ├── interview.ts        # Pre-pipeline client interview
 │   │   ├── config.json         # Timeouts, pricing, allowlists, book mappings, interview questions
 │   │   ├── discussion.ts       # Thread management
@@ -325,23 +332,23 @@ sharkcode/
 
 | Metric | Value |
 |--------|-------|
-| Total commits | 635+ |
-| Development phases completed | 55 |
-| Lines of code (server) | ~4,300 (modularized into 11 route modules) |
-| Lines of code (client) | ~15,500 |
-| Lines of code (orchestrator) | ~4,800 |
+| Total commits | 676+ |
+| Development phases completed | 63 |
+| Lines of code (server) | ~5,400 (modularized into 15 route modules) |
+| Lines of code (client) | ~15,800 |
+| Lines of code (orchestrator) | ~5,600 |
 | Lines of code (MCP) | ~560 |
-| **Total LOC** | **~25,000** |
+| **Total LOC** | **~27,400** |
 | Agent definitions | 16 |
 | Skill definitions | 47 |
 | Research books | 31 |
-| Dashboard views | 16 |
-| Vue composables | 17 |
-| Vue components | 60+ |
-| API routes | 101 (documented in API.md) |
+| Dashboard views | 15 |
+| Vue composables | 16 |
+| Vue components | 30+ |
+| API routes | 120+ |
 | Test suite | 24 tests (bun:test) for critical paths |
 | MCP tools | 10 |
-| Active client projects | 4 |
+| Active client projects | 4 + 11 qualified leads |
 
 ## Setup
 
@@ -407,9 +414,10 @@ bun run tools/orchestrator/run-pipeline.ts {clientId} {phase}
 - **Phase 52:** Wedding Templates integration (personal project)
 
 ### Recently completed
-- **v3.2** — n8n webhook integration (bidirectional HMAC-SHA256), calendar event creation + Google Meet links
-- **v3.3** — Pre-pipeline client interview system, server modularization (2883→168 LOC), 24-test suite, API.md with 101 endpoints
+- **v3.6** — CRM-driven sales pipeline: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi", pipeline labeling, 11 qualified leads (28,100 EUR)
+- **v3.5** — Full pipeline E2E: 9-phase lead-to-audit, source audit FAKE blocking, Tavily MCP, pricing dinamico, template email HTML
 - **v3.4** — Deep project audit (27 findings), critical fixes (config integrity, email auth, cross-boundary imports)
+- **v3.3** — Pre-pipeline client interview system, server modularization (2883→168 LOC), 24-test suite
 
 ## Example: full pipeline run
 
