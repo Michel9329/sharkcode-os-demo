@@ -30,7 +30,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 
 | CRM (11 leads, 28.100 EUR) | Brand Identity |
 |:--------------------------:|:--------------:|
-| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) |
+| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png?v=2) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) |
 
 | System Health | Automations |
 |:-------------:|:-----------:|
