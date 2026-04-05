@@ -10,7 +10,9 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 
 **This is not vaporware.** It manages active client projects with real revenue:
 - 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce)
-- 55 completed development phases across 635+ commits
+- 56+ completed development phases across 640+ commits
+- Full 9-phase pipeline: lead → proposal → research → strategy → design → legal → build → review → audit
+- Source audit blocks fabricated output (FAKE verdict triggers automatic retry)
 - End-to-end tested on production client work
 - Deep audited with 27 findings identified and 5 critical fixes applied
 
@@ -120,7 +122,7 @@ Not generic "assistants". Each agent has a defined identity, specific tool permi
 | **Account Manager** | Sonnet | Client relationship, timeline management, UX research |
 | **Sales** | Sonnet | Proposals, pricing strategy, win theme analysis |
 
-**Tool allowlists are enforced.** Development gets `Read,Write,Edit,Bash`. Legal gets `Read,Write,Grep,Glob,WebSearch`. No agent can access tools it doesn't need. Configured in `config.json`, enforced by the MCP server at runtime.
+**Tool allowlists are enforced.** Development gets `Read,Write,Edit,Bash,Context7`. Sales gets `WebSearch,Tavily,Playwright`. Legal gets `Read,Write,Grep,Glob,WebSearch,Tavily`. No agent can access tools it doesn't need. Configured in `config.json`, enforced by the MCP server at runtime.
 
 ## How the pipeline works
 
@@ -163,7 +165,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **System Health** | Server uptime, DB stats, WebSocket connections, staleness detection |
 | **Deploy** | Cloudflare Pages: deployment history, status, trigger redeploy |
 | **Changelog** | Release notes per phase |
-| **Automations** | Calendar sync, email frequency, notification settings |
+| **Automations** | Active pipelines with live status, checkpoint approve/reject with output preview, phase history |
 
 The design is glassmorphism dark theme with semi-transparent cards, blur effects, and subtle glow animations. Premium look, not Material UI defaults.
 
