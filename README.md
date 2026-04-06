@@ -30,13 +30,17 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 |:--------:|:--------------:|
 | ![Projects](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/03-progetti.png) | ![Knowledge](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/05-knowledge.png) |
 
-| CRM (11 leads, 28.100 EUR) | Brand Identity |
+| CRM (42 leads, 97.300 EUR) | Brand Identity |
 |:--------------------------:|:--------------:|
-| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png?v=2) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) |
+| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png?v=3) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png?v=2) |
+
+| Finance & Invoicing | Email Client |
+|:-------------------:|:------------:|
+| ![Finanza](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/09-finanza.png) | ![Email](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/10-email.png) |
 
 | System Health | Automations |
 |:-------------:|:-----------:|
-| ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png) | ![Automazioni](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/08-automazioni.png) |
+| ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png?v=2) | ![Automazioni](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/08-automazioni.png?v=2) |
 
 ## Architecture
 
