@@ -9,13 +9,11 @@ Sharkcode OS is the command center for [Sharkcode OU](https://sharkcodestudio.co
 The system orchestrates specialized AI agents through a pipeline with explicit checkpoints and human approval gates. Michel says a client name, the system runs research, competitor analysis, SEO, design, legal, development — stopping at each phase for review. Agents communicate with each other through discussion threads. Everything is logged, costed, and visible in a real-time dashboard.
 
 **This is not vaporware.** It manages active client projects with real revenue:
-- 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce) + 42 qualified leads (97,300 EUR pipeline)
-- 68+ completed development phases across 730+ commits
-- Full 9-phase pipeline: lead → proposal → research → strategy → design → legal → build → review → audit
-- Automated lead research: parallel agents scan cities by sector, analyze 100+ sites, qualify leads, insert into CRM
-- CRM-driven sales lifecycle: 7-state machine, per-lead proposals, sortable columns, pagination, unified timeline
-- Invoice system: branded HTML invoices (Poppins), recurring billing, revenue charts, Wise IBAN integration
-- Built-in email client: IMAP multi-folder sync, attachments, AI compose, proper MIME decoding, CSS-isolated rendering
+- 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce) + 11 qualified leads (28,100 EUR pipeline)
+- 75+ completed development phases across 870+ commits
+- Full 10-phase pipeline: lead → proposal → contract → research → brand → design → legal → build → review → audit
+- Digital signature with DocuSeal: sequential signing (Michel → client), calibrated field positions per document type
+- CRM-driven sales lifecycle: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi"
 - Source audit blocks fabricated output (FAKE verdict triggers automatic retry)
 - End-to-end tested on production client work
 - Deep audited with 27 findings identified and all critical fixes applied
@@ -30,17 +28,13 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 |:--------:|:--------------:|
 | ![Projects](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/03-progetti.png) | ![Knowledge](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/05-knowledge.png) |
 
-| CRM (42 leads, 97.300 EUR) | Brand Identity |
+| CRM (11 leads, 28.100 EUR) | Brand Identity |
 |:--------------------------:|:--------------:|
-| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png?v=3) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png?v=2) |
-
-| Finance & Invoicing | Email Client |
-|:-------------------:|:------------:|
-| ![Finanza](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/09-finanza.png) | ![Email](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/10-email.png) |
+| ![CRM](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/04-crm.png) | ![Brand](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/06-brand.png) |
 
 | System Health | Automations |
 |:-------------:|:-----------:|
-| ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png?v=2) | ![Automazioni](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/08-automazioni.png?v=2) |
+| ![System](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/07-system.png) | ![Automazioni](https://raw.githubusercontent.com/Michel9329/sharkcode-os-demo/main/08-automazioni.png) |
 
 ## Architecture
 
@@ -63,6 +57,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 │  • Cost tracking per agent/team/phase (token-level)          │
 │  • Checkpoint files on disk (resumable)                       │
 │  • Env var allowlist (agents only see what they need)         │
+│  • 3-step legal flow: HTML→PDF→DocuSeal signing              │
 └──────┬──────────────┬──────────────────┬────────────────────┘
        │              │                  │
        ▼              ▼                  ▼
@@ -106,6 +101,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 | Calendar | **googleapis** | OAuth2 flow, AES-256-GCM token encryption |
 | Email | **imapflow** + nodemailer | IMAP sync + SMTP send (SiteGround) |
 | Deploy | **Cloudflare API v4** | Deployment status, trigger builds |
+| Signing | **@docuseal/api** | Sequential digital signatures, calibrated field positions |
 | Notifications | **web-push** | Meeting alerts 30min before, pipeline checkpoints |
 | AI | **Claude Code CLI** | Agents spawned as subprocesses, not API calls |
 | MCP | **@modelcontextprotocol/sdk** | 10 custom tools, STDIO transport |
@@ -168,7 +164,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **Project Detail** | Single project deep dive: timeline, discussions, artifacts |
 | **Activity** | Real-time event stream from all agents (WebSocket) |
 | **Discussion** | Thread viewer — agent-to-agent conversations per client/phase |
-| **CRM** | 7-state lead lifecycle, kanban drag-drop, per-lead proposals, sortable columns, pagination 15/page, unified timeline, "cosa fare oggi", 42 qualified leads |
+| **CRM** | 7-state lead lifecycle, kanban drag-drop, per-lead proposals, unified timeline, "cosa fare oggi", 11 qualified leads |
 | **Finance** | Cost tracking, invoices, expenses, revenue per client |
 | **Email** | Full IMAP client: Inbox/Sent/Drafts/Trash, attachments, AI compose with team rules, professional signature |
 | **Knowledge** | Full-text search across 31 research books |
@@ -177,7 +173,7 @@ Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams r
 | **System Health** | Server uptime, DB stats, WebSocket connections, staleness detection |
 | **Deploy** | Cloudflare Pages: deployment history, status, trigger redeploy |
 | **Changelog** | Release notes per phase |
-| **Automations** | Active pipelines with live status, checkpoint approve/reject with output preview, pipeline type/lead labels, archive history |
+| **Automations** | Active pipelines with live status, checkpoint approve/reject with output preview, pipeline type/lead labels, archive history, digital signature (DocuSeal) |
 
 The design is glassmorphism dark theme with semi-transparent cards, blur effects, and subtle glow animations. Premium look, not Material UI defaults.
 
@@ -296,7 +292,8 @@ sharkcode/
 │   │       │       │   ├── calendar.ts    # Google Calendar
 │   │       │       │   ├── email.ts       # IMAP/SMTP
 │   │       │       │   ├── webhooks.ts    # n8n integration
-│   │       │       │   └── ...            # 6 more modules
+│   │       │       │   ├── signature.ts  # DocuSeal digital signatures
+│   │       │       │   └── ...            # 5 more modules
 │   │       │       ├── ws-state.ts        # Shared WebSocket state
 │   │       │       ├── middleware.ts       # CORS + rate limiting
 │   │       │       ├── db.ts              # SQLite schema + WAL + CRM tables
@@ -339,9 +336,9 @@ sharkcode/
 
 | Metric | Value |
 |--------|-------|
-| Total commits | 730+ |
-| Development phases completed | 68 |
-| Lines of code (server) | ~5,400 (modularized into 15 route modules) |
+| Total commits | 870+ |
+| Development phases completed | 75 |
+| Lines of code (server) | ~5,800 (modularized into 15 route modules + signature) |
 | Lines of code (client) | ~15,800 |
 | Lines of code (orchestrator) | ~5,600 |
 | Lines of code (MCP) | ~560 |
@@ -355,7 +352,7 @@ sharkcode/
 | API routes | 120+ |
 | Test suite | 24 tests (bun:test) for critical paths |
 | MCP tools | 10 |
-| Active client projects | 4 + 42 qualified leads (97,300 EUR pipeline) |
+| Active client projects | 4 + 11 qualified leads |
 
 ## Setup
 
@@ -421,11 +418,10 @@ bun run tools/orchestrator/run-pipeline.ts {clientId} {phase}
 - **Phase 52:** Wedding Templates integration (personal project)
 
 ### Recently completed
-- **v3.6** — CRM-driven sales pipeline + full email client: 7-state machine, per-lead proposals, IMAP multi-folder, attachments, AI compose with team rules
-- **v3.7** — UX polish, invoice system (branded HTML, Wise IBAN, recurring), automated lead pipeline (parallel agents scan cities, 102 sites analyzed, 42 leads qualified, 97,300 EUR pipeline), email MIME fix (mailparser, iframe CSS isolation), CRM sorting/pagination
+- **v4.1** — Digital signature with DocuSeal + legal pipeline surgical fixes: 3-step legal flow, 12 bug fixes, 4 security hardening, signature route (377 LOC), per-document field coordinates
+- **v4.0** — Pipeline restructure: contract vs legal split, brand phase with 6 rounds + 2 interactive checkpoints, naming pipeline, Zod validation
+- **v3.6** — CRM-driven sales pipeline + full email client: 7-state machine, per-lead proposals, IMAP multi-folder, attachments, AI compose with team rules, 11 qualified leads (28,100 EUR)
 - **v3.5** — Full pipeline E2E: 9-phase lead-to-audit, source audit FAKE blocking, Tavily MCP, pricing dinamico, template email HTML
-- **v3.4** — Deep project audit (27 findings), critical fixes (config integrity, email auth, cross-boundary imports)
-- **v3.3** — Pre-pipeline client interview system, server modularization (2883→168 LOC), 24-test suite
 
 ## Example: full pipeline run
 
