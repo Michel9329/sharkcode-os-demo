@@ -10,7 +10,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 
 **This is not vaporware.** It manages active client projects with real revenue:
 - 4 clients in pipeline (2 active, 1 prospect, 1 e-commerce) + 11 qualified leads (28,100 EUR pipeline)
-- 75+ completed development phases across 870+ commits
+- 77+ completed development phases across 900+ commits
 - Full 10-phase pipeline: lead → proposal → contract → research → brand → design → legal → build → review → audit
 - Digital signature with DocuSeal: sequential signing (Michel → client), calibrated field positions per document type
 - CRM-driven sales lifecycle: 7-state machine, per-lead proposals, unified timeline, "cosa fare oggi"
@@ -46,17 +46,17 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
                        │ spawns agents via CLI
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Pipeline Orchestrator                       │
+│              Conversational Orchestrator (v5.0)                │
 │                                                               │
-│  run-pipeline.ts → spawn agent → validate output → handoff   │
+│  /run-pipeline → Agent tool → validate output → checkpoint   │
 │                                                               │
-│  • Per-team timeouts (configurable, 600s-900s)               │
-│  • 3-retry circuit breaker with exponential backoff           │
-│  • Process tree kill on timeout (platform-aware)              │
-│  • Quality gates: content validation, not just format         │
-│  • Cost tracking per agent/team/phase (token-level)          │
-│  • Checkpoint files on disk (resumable)                       │
-│  • Env var allowlist (agents only see what they need)         │
+│  • In-session sub-agents (no external process spawn)         │
+│  • Path-based prompts (buildAgentPromptLean, ~500 bytes)     │
+│  • Conversational checkpoints ("Approvi?" in chat)           │
+│  • Inline quality gate (frontmatter + sections + no fakes)   │
+│  • 3-retry with specific feedback per failure                │
+│  • Pipeline state persistence (crash-recoverable)            │
+│  • Per-team tool allowlists (MCP-enforced)                   │
 │  • 3-step legal flow: HTML→PDF→DocuSeal signing              │
 └──────┬──────────────┬──────────────────┬────────────────────┘
        │              │                  │
@@ -103,7 +103,7 @@ The system orchestrates specialized AI agents through a pipeline with explicit c
 | Deploy | **Cloudflare API v4** | Deployment status, trigger builds |
 | Signing | **@docuseal/api** | Sequential digital signatures, calibrated field positions |
 | Notifications | **web-push** | Meeting alerts 30min before, pipeline checkpoints |
-| AI | **Claude Code CLI** | Agents spawned as subprocesses, not API calls |
+| AI | **Claude Code CLI** | Agents orchestrated via Agent tool (in-session, no subprocess spawn) |
 | MCP | **@modelcontextprotocol/sdk** | 10 custom tools, STDIO transport |
 | Validation | **Zod** | Runtime schema validation for pipeline config |
 
@@ -135,23 +135,57 @@ Not generic "assistants". Each agent has a defined identity, specific tool permi
 ## How the pipeline works
 
 ```
-Michel: "run-pipeline valerio research"
+Michel: "/run-pipeline valerio contract"
 
-1. Orchestrator loads client brief (target persona, budget, goals)
-2. Resolves which teams run in what order
-3. Spawns Research agent as a subprocess
-   └── Agent reads: client brief + relevant books + previous phase output
-   └── Agent writes: research output to .planning/context/valerio/research/
-   └── Agent posts discussion messages visible to other teams
-4. Pipeline validates output (word count, required sections, key decisions)
-5. If validation fails → retry (up to 3x with backoff)
-6. If passes → generate handoff document for next phase
-7. Dashboard shows everything in real-time via WebSocket
-8. Michel reviews, approves or requests changes
-9. Next phase starts
+1. Orchestrator reads SKILL.md, loads client brief and phase config
+2. Pre-step: compile-legal.ts compiles HTML templates with client data
+3. Launches legal-lead via Agent tool (in-session, no subprocess)
+   └── Agent receives path-based prompt (~500 bytes, not inline content)
+   └── Agent reads: brief, persona, cross-team output (via file paths)
+   └── Agent writes: output to .planning/context/valerio/legal/
+4. Inline quality gate: frontmatter check, required sections, no fake data
+5. If validation fails → retry with specific feedback (up to 3x)
+6. If passes → launch next agent (language-checker)
+7. Checkpoint in conversation: "Round 1 completato. Approvi?"
+8. Michel reviews output, approves or requests changes
+9. Pipeline state saved, handoff generated, next phase ready
 ```
 
 Each phase produces artifacts in `.planning/context/{clientId}/{team}/`. Teams read each other's output. Design reads Brand. Development reads Design. SEO reads Research. It's not a chain — it's a directed graph.
+
+## Why we migrated from subprocess to Agent tool (v5.0)
+
+The original architecture spawned each agent as a separate `claude -p` subprocess. It worked, but had real problems:
+
+**What broke with subprocess spawning:**
+- Each `claude -p` call burns a full Claude Max session slot and loads the entire agent context from scratch
+- 15-minute timeouts on complex phases (brand, research) caused silent failures mid-pipeline
+- No way to ask Michel "does this look right?" mid-execution. Checkpoints were file-based polling
+- Context couldn't flow between agents within a session. Each subprocess started cold
+- Cost tracking required parsing CLI output since there's no billing API for Max subscriptions
+
+**What the Agent tool approach gives us:**
+- Sub-agents run inside the current Claude Code session. Zero spawn overhead
+- Path-based prompts (~500 bytes) instead of injecting full file content (~50KB). The sub-agent reads files itself with its fresh context window
+- Conversational checkpoints: "Round 1 done. Legal-lead reviewed 3 docs, 0 issues. Proceed?"
+- Inline quality gate: the parent verifies output immediately after each agent, retries with specific feedback
+- Pipeline state persisted to JSON. If the session crashes, next session resumes from the last completed agent
+
+**The tradeoff:**
+- Dashboard visibility regressed. Subprocesses triggered hooks automatically (each was a session). Agent tool sub-agents run inside the parent session, so the dashboard only sees one active session. Fix planned for v5.1.
+- No parallel execution yet. Subprocess spawning allowed concurrent agents. Agent tool is sequential in v5.0, parallel coming in v5.1.
+
+**Measured on contract phase (compile-legal + legal-lead + language-checker):**
+
+| Metric | Subprocess (`claude -p`) | Agent tool (v5.0) |
+|--------|------------------------|--------------------|
+| Total time | 238s | 320s |
+| Prompt size per agent | ~50KB inline | ~500 bytes (paths only) |
+| Crash recovery | Manual restart | Auto-resume from state |
+| Checkpoint style | File polling | Conversation ("Approvi?") |
+| Context reuse | None (cold start) | Parent retains cross-agent context |
+
+The time increase is because Opus processes the legal-lead review more thoroughly (285s vs ~180s), not overhead. The language-checker on Haiku runs in 29s.
 
 **Cost is tracked per token.** Every agent run logs: model used, input tokens, output tokens, cost in USD, duration. Visible in the Finance view.
 
